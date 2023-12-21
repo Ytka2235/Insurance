@@ -35,9 +35,5 @@ namespace Insurance
             this.date_end = date_end;
             this.path = path;
         }
-        public Person()
-        {
-
-        }
     }
 }

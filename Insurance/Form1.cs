@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 
@@ -19,21 +20,7 @@ namespace Insurance
             full_list();
         }
 
-        public void Read(int index, string path)
-        {
-            try
-            {
-                using (StreamReader reader = new StreamReader(path))
-                {
-                    people[index] = new Person(reader.ReadLine(), reader.ReadLine(), reader.ReadLine(), reader.ReadLine(), reader.ReadLine(), reader.ReadLine(), reader.ReadLine(), reader.ReadLine(), reader.ReadLine(), reader.ReadLine(), path);
-
-                }
-            }
-            catch
-            {
-                MessageBox.Show("Error", "Ошибка");
-            }
-        }
+        
 
 
 
@@ -223,27 +210,38 @@ namespace Insurance
             {
                 listBox1.Items.Clear();
                 string[] file = Directory.GetFiles("person");
+                bool flag = true;
                 if (file != null)
                 {
                     people = new Person[file.Length];
                     int i = 0;
                     foreach (string path in file)
                     {
-                        Read(i, path);
-                        i++;
+                        try
+                        {
+                            using (StreamReader reader = new StreamReader(path))
+                            {
+                                people[i] = new Person(reader.ReadLine(), reader.ReadLine(), reader.ReadLine(), reader.ReadLine(), reader.ReadLine(), reader.ReadLine(), reader.ReadLine(), reader.ReadLine(), reader.ReadLine(), reader.ReadLine(), path);
+
+                            }
+                            i++;
+                        }
+                        catch 
+                        {
+                            File.Delete(path);
+                            flag = false;
+                            full_list();
+                            break;
+                        }
                     }
                 }
-                string[] name = new string[people.Length];
+                if (flag)
+                { 
+                    string[] name = new string[people.Length];
                 for (int i = 0; i < people.Length; i++) name[i] = people[i].name;
                 listBox1.Items.AddRange(name);
-                try
-                {
-                    listBox1.SelectedIndex = 0;
                 }
-                catch
-                {
-
-                }
+                
             }
             catch
             {
@@ -308,8 +306,7 @@ namespace Insurance
 
         public void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            try
-            {
+            
                 int id = listBox1.SelectedIndex;
                 but_add.Enabled = true;
                 but_delete.Enabled = true;
@@ -326,11 +323,7 @@ namespace Insurance
                 textBox8.Text = people[id].insurance_nember;
                 textBox9.Text = people[id].date_start;
                 textBox10.Text = people[id].date_end;
-            }
-            catch
-            {
-                MessageBox.Show("Error", "Ошибка");
-            }
+            
 
         }
 
@@ -393,6 +386,10 @@ namespace Insurance
             try
             {
                 int id = listBox1.SelectedIndex;
+                using (StreamReader reader = new StreamReader(people[id].path))
+                {
+                    
+                }
                 File.Delete(people[id].path);
                 full_list();
                 MessageBox.Show("Удаление успешно выполнено", "Успешно!");
